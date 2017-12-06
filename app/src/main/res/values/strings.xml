@@ -8,4 +8,9 @@
     <string name="div">/</string>
     <string name="wynik">Wynik</string>
     <string name="pi">Podaj liczbę Pi</string>
+    <string name="cler">Czyść</string>
+    <string name="about">About</string>
+    <string name="clear">Clear</string>
+    <string name="author">Autor: Andrzej Kierepka</string>
+    <string name="roz">Rozkład na czynniki pierwsze</string>
 </resources>

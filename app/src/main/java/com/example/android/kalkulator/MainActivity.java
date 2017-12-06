@@ -4,19 +4,28 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.AsyncTask;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import java.util.Random;
+
 public class MainActivity extends AppCompatActivity {
-    EditText n1EdT,n2EdT,resEdT;
-    Button sub,mul,div,add,pi;
+    EditText n1EdT,n2EdT,resEdT,resR;
+    Button sub,mul,div,add,pi,fNum;
     LogicService logicService;
     boolean mBound=false;
+    ProgressBar progressBar;
     private ServiceConnection logicConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -50,7 +59,15 @@ public class MainActivity extends AppCompatActivity {
             this.unbindService(logicConnection);
         }
     }
+    final Handler handler= new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(Message msg) {
 
+            String str = msg.getData().getString("num");
+            resR.setText(str);
+            return true;
+        }
+    });
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,6 +80,10 @@ public class MainActivity extends AppCompatActivity {
         div= (Button) findViewById(R.id.divbutton);
         add= (Button) findViewById(R.id.addbutton);
         pi =(Button) findViewById(R.id.piButton);
+        fNum =(Button) findViewById(R.id.fNum);
+        resR =(EditText) findViewById(R.id.resR);
+        progressBar= (ProgressBar)findViewById(R.id.progressBar);
+
         add.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -130,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
                 if (mBound){
-                    if(n1!=0.0){
+                    if(n2!=0.0){
                         double ret= logicService.div(n1,n2) ;
                         resEdT.setText(String.valueOf(ret));
                     }
@@ -138,6 +159,81 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+        pi.setOnClickListener(new View.OnClickListener() {
+                                  @Override
+                                  public void onClick(View view) {
+                                      new AsynTask().execute(Integer.parseInt(n1EdT.getText().toString()));
+                                  }
+                              }
+        );
+        fNum.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Message m = handler.obtainMessage();
+                        Bundle b= new Bundle();
+                        int tmp = Integer.parseInt(n1EdT.getText().toString());
+                        StringBuilder s = new StringBuilder();
+                        int num=2;
+                        while(tmp>1){
+                            if(tmp%num==0){
+                                s.append(num).append(" ");
+                                tmp/=num;
+                            }
+                            else{
+                                num++;
+                            }
+                        }
+                        b.putString("num",s.toString());
+                        m.setData(b);
+                        handler.sendMessage(m);
+                    }
+                }).start();
+            }
+        });
+    }
+    private class AsynTask extends AsyncTask<Integer,Void,Double> {
+
+        @Override
+        protected Double doInBackground(Integer... doubles) {
+            Random generator = new Random();
+            int nk = 0;
+            double x,y;
+            double s;
+            for(int i = 1; i <= doubles[0]; i++)
+            {
+                x = generator.nextDouble();
+                y = generator.nextDouble();
+                if(x*x + y*y <= 1)
+                {
+                    nk++;
+                }
+            }
+            s = 4. * nk / doubles[0];
+            return s;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            Toast.makeText(MainActivity.this,"Start execute Pi",Toast.LENGTH_SHORT).show();
+            progressBar.setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        protected void onPostExecute(Double aDouble) {
+            Toast.makeText(MainActivity.this,"End execute Pi",Toast.LENGTH_SHORT).show();
+            resEdT.setText(String.valueOf(aDouble));
+            progressBar.setVisibility(View.GONE);
+        }
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_activity, menu);
+        return true;
+
+    }
 }

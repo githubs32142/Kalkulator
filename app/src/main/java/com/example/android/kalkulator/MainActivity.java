@@ -8,10 +8,12 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -174,7 +176,8 @@ public class MainActivity extends AppCompatActivity {
                     public void run() {
                         Message m = handler.obtainMessage();
                         Bundle b= new Bundle();
-                        int tmp = Integer.parseInt(n1EdT.getText().toString());
+                        Double number= Double.parseDouble(n1EdT.getText().toString());
+                        int tmp = number.intValue();
                         StringBuilder s = new StringBuilder();
                         int num=2;
                         while(tmp>1){
@@ -234,6 +237,38 @@ public class MainActivity extends AppCompatActivity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_activity, menu);
         return true;
+
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()) {
+            case R.id.clear:{
+                n1EdT.setText("0.0");
+                n2EdT.setText("0.0");
+                resEdT.setText("0.0");
+                resR.setText("0.0");
+                Toast.makeText(MainActivity.this,"Make cler data",Toast.LENGTH_SHORT).show();
+                return true;
+            }
+            case R.id.about:{
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                View v= getLayoutInflater().inflate(R.layout.author_layout,null);
+                builder.setView(v);
+                final AlertDialog dialog = builder.create();
+                final  Button btn = (Button)v.findViewById(R.id.okBtn);
+                btn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        dialog.cancel();
+                    }
+                });
+
+                dialog.show();
+            }
+            default:
+                return false;
+        }
 
     }
 }
